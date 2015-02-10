@@ -1,5 +1,6 @@
 # StravaWeather
 Displays historical weather data on segment efforts and activities
+![StravaWeather screenshot](https://raw.githubusercontent.com/o2dazone/StravaWeather/master/screenshot.png "StravaWeather screenshot")
 
 # Install
 ## Keys
