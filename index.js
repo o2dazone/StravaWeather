@@ -200,7 +200,7 @@
 
   /* get wind data for a segment's leaderboard */
   function getSegmentWind() {
-    var segmentId = window.location.href.match(/\d+/g)[0];
+    var segmentId = w.location.href.match(/\d+/g)[0];
 
     // if no segment data exists in localStorage
     if (!localStorage['weatherdata-'+segmentId]) {
@@ -222,7 +222,7 @@
 
   /* get wind data for a single activity */
   function getActivityWind() {
-    var activityId = window.location.href.match(/\d+/g)[0];
+    var activityId = w.location.href.match(/\d+/g)[0];
     var weatherData = localStorage['weatherdata-' + activityId] || null;
 
     if (!weatherData) {
@@ -244,12 +244,12 @@
   function init() {
     if (areKeysSet()) {
       // you're on an activities page (sloppy)
-      if (window.location.href.indexOf('activities') + 1) {
+      if (w.location.href.indexOf('activities') + 1) {
         getActivityWind(); return;
       }
 
       // you're on a segment page. (sloppy)
-      if (window.location.href.indexOf('segments') + 1) {
+      if (w.location.href.indexOf('segments') + 1) {
         getSegmentWind(); return;
       }
     }
