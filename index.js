@@ -96,7 +96,7 @@
 
   /* return wind speed and direction */
   function getWind(wind) {
-    return Math.round(wind.windSpeed) + ' mph' + getWindDirection(wind.windBearing);
+    return Math.round(wind.windSpeed) + ' mph' + getWindDirectionArrow(wind.windBearing);
   }
 
   /* get forecast.io endpoint url */
@@ -104,32 +104,9 @@
     return 'https://api.forecast.io/forecast/' + forecastKey + '/' + coords.join(',') + ',' + date;
   }
 
-  /* wind direction script by basarat - https://gist.github.com/basarat/4670200 */
-  function getWindDirection(angle) {
-    //easy to customize by changing the number of directions you have
-    var directions = 8;
-
-    var degree = 360 / directions;
-    angle = angle + degree/2;
-
-    if (angle >= 0 * degree && angle < 1 * degree)
-        return "&#8595;"; // from the north
-    if (angle >= 1 * degree && angle < 2 * degree)
-        return "&#8601;"; // from the northeast
-    if (angle >= 2 * degree && angle < 3 * degree)
-        return "&#8592;"; // from the east
-    if (angle >= 3 * degree && angle < 4 * degree)
-        return "&#8598;"; // from the southeast
-    if (angle >= 4 * degree && angle < 5 * degree)
-        return "&#8593;"; // from the south
-    if (angle >= 5 * degree && angle < 6 * degree)
-        return "&#8599;"; // from the southwest
-    if (angle >= 6 * degree && angle < 7 * degree)
-        return "&#8594;"; // from the west
-    if (angle >= 7 * degree && angle < 8 * degree)
-        return "&#8600;"; // from the northwest
-    //Should never happen:
-    return "&#8595;"; // from the north
+  /* render wind direction */
+  function getWindDirectionArrow(angle) {
+    return '<arrow style="margin:3px;-webkit-text-fill-color:white;-webkit-text-stroke-width:1px;-webkit-text-stroke-color:#1AF;font-size:14px;display:inline-block;transform:rotate(' + (angle-90) + 'deg);">&#10148;</arrow>'
   }
 
   /* get month day year WG url based on dom elements (super sloppy) */
