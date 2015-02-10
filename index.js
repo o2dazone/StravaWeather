@@ -110,35 +110,7 @@
 
   /* get month day year WG url based on dom elements (perhaps git this from somewhere else) */
   function getWundergroundUrl(coords, month, day, year) {
-    console.log(month, day, year);
-    switch (true) {
-      case /^Jan/.test(month):
-        month = 1; break;
-      case /^Feb/.test(month):
-        month = 2; break;
-      case /^Mar/.test(month):
-        month = 3; break;
-      case /^Apr/.test(month):
-        month = 4; break;
-      case /^May/.test(month):
-        month = 5; break;
-      case /^Jun/.test(month):
-        month = 6; break;
-      case /^Jul/.test(month):
-        month = 7; break;
-      case /^Aug/.test(month):
-        month = 8; break;
-      case /^Sep/.test(month):
-        month = 9; break;
-      case /^Oct/.test(month):
-        month = 10; break;
-      case /^Nov/.test(month):
-        month = 11; break;
-      case /^Dec/.test(month):
-        month = 12; break;
-      default:
-    }
-
+    month = new Date(Date.parse(month +" 1, 2012")).getMonth()+1;
     return 'http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=' + coords.join(',')+'&month=' + month + '&day=' + day + '&year=' + year;
   }
 
