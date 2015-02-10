@@ -84,7 +84,7 @@
     var effortDom = d.querySelector('#results a[href="/segment_efforts/' + effortId + '"'),
         date      = effortDom.innerText.split(' '),
         month     = date[0],
-        day       = date[1].match(/\d/),
+        day       = date[1].match(/\d+/),
         year      = date[2],
         coords    = [weather.latitude, weather.longitude];
 
@@ -96,7 +96,11 @@
 
   /* return wind speed and direction */
   function getWind(wind) {
-    return Math.round(wind.windSpeed) + ' mph' + getWindDirectionArrow(wind.windBearing);
+    return [
+      Math.round(wind.windSpeed),
+      ' mph',
+      '<arrow style="margin:3px;-webkit-text-fill-color:white;-webkit-text-stroke-width:1px;-webkit-text-stroke-color:#1AF;display:inline-block;transform:rotate(' + (wind.windBearing - 270) + 'deg);">&#10148;</arrow>'
+    ].join('');
   }
 
   /* get forecast.io endpoint url */
@@ -104,50 +108,33 @@
     return 'https://api.forecast.io/forecast/' + forecastKey + '/' + coords.join(',') + ',' + date;
   }
 
-  /* render wind direction */
-  function getWindDirectionArrow(angle) {
-    angle = angle - 270 //- 90 - 180, wind bearing is direction in which the wind comes from, 180 is direction the wind is blowing. 90 degree because the arrow graphic normally faces right
-    return '<arrow style="margin:3px;-webkit-text-fill-color:white;-webkit-text-stroke-width:1px;-webkit-text-stroke-color:#1AF;display:inline-block;transform:rotate(' + angle + 'deg);">&#10148;</arrow>'
-  }
-
-  /* get month day year WG url based on dom elements (super sloppy) */
+  /* get month day year WG url based on dom elements (perhaps git this from somewhere else) */
   function getWundergroundUrl(coords, month, day, year) {
-    // ugh...
-    switch (month) {
-      case 'Jan':
-      case 'January':
+    console.log(month, day, year);
+    switch (true) {
+      case /^Jan/.test(month):
         month = 1; break;
-      case 'Feb':
-      case 'February':
+      case /^Feb/.test(month):
         month = 2; break;
-      case 'Mar':
-      case 'March':
+      case /^Mar/.test(month):
         month = 3; break;
-      case 'Apr':
-      case 'April':
+      case /^Apr/.test(month):
         month = 4; break;
-      case 'May':
+      case /^May/.test(month):
         month = 5; break;
-      case 'Jun':
-      case 'June':
+      case /^Jun/.test(month):
         month = 6; break;
-      case 'Jul':
-      case 'July':
+      case /^Jul/.test(month):
         month = 7; break;
-      case 'Aug':
-      case 'August':
+      case /^Aug/.test(month):
         month = 8; break;
-      case 'Sep':
-      case 'September':
+      case /^Sep/.test(month):
         month = 9; break;
-      case 'Oct':
-      case 'October':
+      case /^Oct/.test(month):
         month = 10; break;
-      case 'Nov':
-      case 'November':
+      case /^Nov/.test(month):
         month = 11; break;
-      case 'Dec':
-      case 'December':
+      case /^Dec/.test(month):
         month = 12; break;
       default:
     }
