@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+
+  "name": "Strava Weather",
+  "description": "Displays weather data (only wind for now) for efforts made in a segment and activity.",
+  "version": "0.1",
+
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+
+  "permissions": [
+      "https://api.forecast.io/*"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["https://www.strava.com/activities/*","https://www.strava.com/segments/*" ],
+      "js": ["index.js"]
+    }
+  ]
+}
