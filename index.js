@@ -106,7 +106,8 @@
 
   /* render wind direction */
   function getWindDirectionArrow(angle) {
-    return '<arrow style="margin:3px;-webkit-text-fill-color:white;-webkit-text-stroke-width:1px;-webkit-text-stroke-color:#1AF;font-size:14px;display:inline-block;transform:rotate(' + (angle-90) + 'deg);">&#10148;</arrow>'
+    angle = angle - 270 //- 90 - 180, wind bearing is direction in which the wind comes from, 180 is direction the wind is blowing. 90 degree because the arrow graphic normally faces right
+    return '<arrow style="margin:3px;-webkit-text-fill-color:white;-webkit-text-stroke-width:1px;-webkit-text-stroke-color:#1AF;font-size:14px;display:inline-block;transform:rotate(' + angle + 'deg);">&#10148;</arrow>'
   }
 
   /* get month day year WG url based on dom elements (super sloppy) */
