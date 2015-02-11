@@ -12,7 +12,8 @@
   },
 
   "permissions": [
-      "https://api.forecast.io/*"
+      "http://api.wunderground.com/*",
+      "https://api.wunderground.com/*"
   ],
 
   "content_scripts": [
