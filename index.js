@@ -127,7 +127,7 @@
       date,
       '/q/',
       coords.join(','),
-      '.json'
+      '.json?apiref=29a88f63f2af2eab'
     ].join('');
   }
 
