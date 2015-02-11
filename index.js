@@ -27,38 +27,37 @@
 
 
   /* gather data from localStorage or API for individual activity */
-  function fetchActivityWeather(data, activityId) {
-    var lsWeather = localStorage['activity-' + activityId] || null;
+  function fetchActivityWeather(data, id) {
+    var localWeather = localStorage['activity-' + id] || null;
 
-    if (lsWeather) {
-      // render arrow on activity page
-      renderActivityWeather(JSON.parse(lsWeather));
+    if (localWeather) {
+      renderActivityWeather(JSON.parse(localWeather));
     } else {
-      getJSON(getForecastUrl(data.start_latlng, data.start_date), function(weatherData, activityId) {
-        localStorage.setItem('activity-' + activityId, JSON.stringify(weatherData));
+      getJSON(getForecastUrl(data.start_latlng, data.start_date), function(weatherData, id) {
+        localStorage.setItem('activity-' + id, JSON.stringify(weatherData));
         renderActivityWeather(weatherData);
-      }, activityId);
+      }, id);
     }
   }
 
   /* gather data from localStorage or API for segments */
   function fetchEffortWeather(data, coords) {
-    // adjust number of efforts to get wind data on here
-    var i, atheleteInfo, date, effortId, lsWeather;
+    var i, atheleteInfo, date, id, localWeather;
+
     for (i = 0; i < effortNum; i++) {
       athleteInfo = data[i];
       date = athleteInfo.start_date;
-      effortId = athleteInfo.effort_id;
-      lsWeather = localStorage['effort-' + effortId] || null;
+      id = athleteInfo.effort_id;
+      localWeather = localStorage['effort-' + id] || null;
 
       // if local storage weather is already set
-      if (lsWeather) {
-        renderEffortWeather(effortId, JSON.parse(lsWeather), coords);
+      if (localWeather) {
+        renderEffortWeather(JSON.parse(localWeather), id);
       } else { // if its not set, call forecast.io api
-        getJSON(getForecastUrl(coords, date), function(weatherData, effortId) {
-          localStorage.setItem('effort-' + effortId, JSON.stringify(weatherData));
-          renderEffortWeather(effortId, weatherData, coords);
-        }, effortId);
+        getJSON(getForecastUrl(coords, date), function(weatherData, id) {
+          localStorage.setItem('effort-' + id, JSON.stringify(weatherData));
+          renderEffortWeather(weatherData, id);
+        }, id);
       }
     }
   }
@@ -76,20 +75,19 @@
         coords      = [weather.latitude, weather.longitude];
 
     activityDom.innerHTML += ('<li><strong>' + getWind(weather.currently) +
-                              '</strong><div class="label">Wind Speed <a href=' + getWundergroundUrl(coords, month, day, year) + ' target="_blank">(WG)</a></div></li>');
+                              '</strong><div class="label">Wind Speed ' + getWundergroundUrl(coords, month, day, year) + '</div></li>');
   }
 
   /* create and inject segment leaderboard wind data */
-  function renderEffortWeather(effortId, weather) {
-    var effortDom = d.querySelector('#results a[href="/segment_efforts/' + effortId + '"'),
+  function renderEffortWeather(weather, id) {
+    var effortDom = d.querySelector('#results a[href="/segment_efforts/' + id + '"'),
         date      = effortDom.innerText.split(' '),
         month     = date[0],
         day       = date[1].match(/\d+/),
         year      = date[2],
         coords    = [weather.latitude, weather.longitude];
 
-    effortDom.parentNode.innerHTML += (getWind(weather.currently) +
-                                      ' <a href=' + getWundergroundUrl(coords, month, day, year) + ' target="_blank">(WG)</a>');
+    effortDom.parentNode.innerHTML += (getWind(weather.currently) + getWundergroundUrl(coords, month, day, year));
   }
 
 
@@ -105,13 +103,20 @@
 
   /* get forecast.io endpoint url */
   function getForecastUrl(coords, date) {
-    return 'https://api.forecast.io/forecast/' + forecastKey + '/' + coords.join(',') + ',' + date;
+    return [
+      'https://api.forecast.io/forecast/',
+      forecastKey,
+      '/',
+      coords.join(','),
+      ',',
+      date
+    ].join('');
   }
 
   /* get month day year WG url based on dom elements (perhaps git this from somewhere else) */
   function getWundergroundUrl(coords, month, day, year) {
     month = new Date(Date.parse(month +" 1, 2012")).getMonth()+1;
-    return 'http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=' + coords.join(',')+'&month=' + month + '&day=' + day + '&year=' + year;
+    return '<a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=' + coords.join(',')+'&month=' + month + '&day=' + day + '&year=' + year + '" target="_blank">(WG)</a>';
   }
 
   /* publish help for setting up forecast.io API key */
@@ -130,7 +135,6 @@
 
 
     return (!forecastKey || !stravaKey) ? false : true;
-
   }
 
 
