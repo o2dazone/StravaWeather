@@ -4,9 +4,9 @@ Displays historical weather data on segment efforts and activities
 
 # Install
 ## Keys
-First you need your own Forecast.io (https://developer.forecast.io) and Strava API (https://www.strava.com/settings/api) keys. Once these are set up, write them to your local storage by visiting Strava's website and running this in the console
+First you need your own Wunderground API (http://www.wunderground.com/weather/api) and Strava API (https://www.strava.com/settings/api) keys. Once these are set up, write them to your local storage by visiting Strava's website and running this in the console
 ```
-localStorage.setItem('strava-weather-forecast-key','<your forecast.io api key>'); localStorage.setItem('strava-weather-strava-key','<your strava api key>');
+localStorage.setItem('strava-weather-wunderground-key','<your forecast.io api key>'); localStorage.setItem('strava-weather-strava-key','<your strava api key>');
 ```
 Once this is done, you should have the API data necessary to make calls.
 
