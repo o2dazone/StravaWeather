@@ -17,7 +17,7 @@
 
   "content_scripts": [
     {
-      "matches": ["https://www.strava.com/activities/*","https://www.strava.com/segments/*" ],
+      "matches": ["https://www.strava.com/activities/*","http://www.strava.com/activities/*","https://www.strava.com/segments/*","http://www.strava.com/segments/*" ],
       "js": ["index.js"]
     }
   ]
