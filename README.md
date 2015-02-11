@@ -17,4 +17,4 @@ Clone this repo down. Open up Chrome, and go to your Extensions. Check the box "
 I got tired of seeing people putting one another on blast for a KOM. This demystifies a lot of what went down
 
 # I GOT A LEGIT KOM, THE WEATHER DATA IS WRONG!!!!
-This might be true, which is why I also list historical weather data to Wunderground (different from Forecast.io). See for yourself, if it's inaccurate, or you otherwise feel your effort was made by hard work, tell someone who cares lol. (ps not me)
+This might be true, which is why I also include a static link to Wunderground's historical weather page. See for yourself, if it's inaccurate, or you otherwise feel your effort was made by hard work, tell someone who cares lol. (ps not me)
