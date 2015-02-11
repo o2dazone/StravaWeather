@@ -47,10 +47,11 @@
 
 
   function getDates(date) {
+    date = date.split('T')[0].split('-');
     return {
-      year: date[0].split('-')[0],
-      month: date[0].split('-')[1],
-      day: date[0].split('-')[2]
+      year: date[0],
+      month: date[1],
+      day: date[2]
     };
   }
 
@@ -133,7 +134,7 @@
   /* get month day year WG url based on dom elements (perhaps git this from somewhere else) */
   function getWundergroundUrl(coords, month, day, year) {
     month = new Date(Date.parse(month +" 1, 2012")).getMonth()+1;
-    return '<a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=' + coords.join(',')+'&month=' + month + '&day=' + day + '&year=' + year + '" target="_blank">(WG)</a>';
+    return '<a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=' + coords.join(',')+'&month=' + month + '&day=' + day + '&year=' + year + '&apiref=29a88f63f2af2eab" target="_blank">(WG)</a>';
   }
 
   /* publish help for setting up wunderground API key */
