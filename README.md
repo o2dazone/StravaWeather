@@ -14,7 +14,7 @@ Once this is done, you should have the API data necessary to make calls.
 Clone this repo down. Open up Chrome, and go to your Extensions. Check the box "Developer Mode" and click the button "Load unpacked extension...". Navigate to this directory, and enjoy!
 
 # Why
-I got tired of seeing people putting one another on blast for a KOM. This demystifies a lot of what went down
+I got tired of seeing people putting one another on blast for a KOM. This demystifies a lot of what went down.
 
 # I GOT A LEGIT KOM, THE WEATHER DATA IS WRONG!!!!
-This might be true, which is why I also include a static link to Wunderground's historical weather page. See for yourself, if it's inaccurate, or you otherwise feel your effort was made by hard work, tell someone who cares lol. (ps not me)
+This might be true, which is why I also include a link to Wunderground's historical weather page on the mph/arrow.
