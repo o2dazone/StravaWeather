@@ -7,6 +7,11 @@
 
   var effortNum = 3; // number of leaders on a segment should we fetch weather data for
 
+
+
+  var apiUrl = '//api.wunderground.com/api/',
+      apiref = '29a88f63f2af2eab';
+
   /* gather data from localStorage or API for individual activity */
   function fetchActivityWeather(data, id) {
     var date = data.start_date_local_raw || data.start_date_local,
@@ -16,6 +21,7 @@
     if (localWeather) {
       renderActivityWeather(JSON.parse(localWeather), date, coords);
     } else {
+
       $.getJSON(getForecastUrl(coords, date), function(weatherData) {
         localStorage.setItem('activity-' + id, JSON.stringify(weatherData));
         renderActivityWeather(weatherData, date, coords);
@@ -63,7 +69,8 @@
 
     for (i = 0, len = observations.length; i < len; i++) {
       var hourWeather = observations[i];
-      if (+hourWeather.date.hour === +hour) {
+      if (+hourWeather.date.hour === +hour && hourWeather.wspdi != '-9999') {
+
         avgSpeed += +hourWeather.wspdi;
         if (+hourWeather.wdird > 179) {
           hourWeather.wdird = +hourWeather.wdird - 360;
@@ -73,15 +80,16 @@
       }
     }
 
-    avgSpeed = (avgSpeed/match);
-    avgDir = (avgDir/match);
+    if (match) {
+      avgSpeed = (avgSpeed/match);
+      avgDir = (avgDir/match);
+    }
 
     return {
       speed: avgSpeed,
       direction: avgDir
     };
   }
-
 
   /* create and inject activity wind data */
   function renderActivityWeather(weather, date, coords) {
@@ -110,24 +118,27 @@
 
   /* return wind speed and direction */
   function getWind(speed, dir) {
-    return [
-      Math.round(speed),
-      'mph',
-      getArrow(dir),
-    ].join('');
+
+    if (speed) {
+      return [
+        Math.round(speed),
+        'mph',
+        getArrow(dir),
+      ].join('');
+    } else {
+      return 'No Data';
+    }
   }
 
   /* get wunderground endpoint url */
   function getForecastUrl(coords, date) {
     date = date.split('T')[0].split('-').join('');
     return [
-      '//api.wunderground.com/api/',
-      wundergroundKey,
+      apiUrl, wundergroundKey,
       '/history_',
       date,
       '/q/',
-      coords.join(','),
-      '.json?apiref=29a88f63f2af2eab'
+      coords.join(','), '.json?apiref=', apiref
     ].join('');
   }
 
