@@ -54,9 +54,11 @@
 
   function getDates(date) {
     date = date.split('T')[0].split('-');
+    month = new Date(Date.parse(date[1] +" 1, 2012")).getMonth()+1;
+
     return {
       year: date[0],
-      month: date[1],
+      month: month,
       day: date[2]
     };
   }
@@ -97,8 +99,16 @@
     var date = getDates(date);
 
     var activityDom = d.querySelector('.inline-stats');
-    activityDom.innerHTML += ('<li><strong>' + getWind(wind.speed, wind.direction) +
-                              '</strong><div class="label">Wind Speed ' + getWundergroundUrl(coords, date.month, date.day, date.year) + '</div></li>');
+    activityDom.innerHTML += [
+                              '<li>',
+                                '<strong>',
+                                  '<a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', apiref, '" target="_blank">',
+                                    getWind(wind.speed, wind.direction),
+                                  '</a>',
+                                '</strong>',
+                                '<div class="label">Wind Speed</div>',
+                              '</li>'
+                             ].join('');
   }
 
   /* create and inject segment leaderboard wind data */
@@ -107,7 +117,11 @@
     var date = getDates(date);
 
     var effortDom = d.querySelector('#results a[href="/segment_efforts/' + id + '"');
-    effortDom.parentNode.innerHTML += (getWind(wind.speed, wind.direction) + getWundergroundUrl(coords, date.month, date.day, date.year));
+    effortDom.parentNode.innerHTML += [
+                                        ' - <a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', apiref, '" target="_blank">',
+                                          getWind(wind.speed, wind.direction),
+                                        '</a>',
+                                      ].join('');
   }
 
   function getArrow(dir) {
@@ -118,7 +132,6 @@
 
   /* return wind speed and direction */
   function getWind(speed, dir) {
-
     if (speed) {
       return [
         Math.round(speed),
@@ -140,12 +153,6 @@
       '/q/',
       coords.join(','), '.json?apiref=', apiref
     ].join('');
-  }
-
-  /* get month day year WG url based on dom elements (perhaps git this from somewhere else) */
-  function getWundergroundUrl(coords, month, day, year) {
-    month = new Date(Date.parse(month +" 1, 2012")).getMonth()+1;
-    return '<a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=' + coords.join(',')+'&month=' + month + '&day=' + day + '&year=' + year + '&apiref=29a88f63f2af2eab" target="_blank">(WG)</a>';
   }
 
   /* publish help for setting up wunderground API key */
