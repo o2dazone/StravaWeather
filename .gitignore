@@ -1,3 +1,4 @@
 .keys
 .DS_Store
 TODO
+*.sublime-*
