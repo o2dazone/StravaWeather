@@ -81,9 +81,16 @@
 	    return (!constant.wundergroundKey() || !constant.stravaKey) ? false : true;
 	  },
 
+	  /* sometimes people put their sponsors instead of their names "Michael Jackson PRO TEAM CYLCERY VELO RAPHA CHAMOIS", fixes that */
+	  fixTables: function() {
+	    var style = '<style type="text/css">.ldrboard td.athlete a {white-space:nowrap; text-overflow:ellipsis; overflow:hidden; width:200px; display:inline-block}</style>'
+	    document.head.innerHTML += style;
+	  },
+
 	  /* start the chrome extension */
 	  start: function () {
 	    var self = this;
+
 	    if (self.keys()) {
 	      // you're on an activities page (sloppy)
 	      if (window.location.href.indexOf('activities') + 1) {
@@ -93,6 +100,7 @@
 
 	      // you're on a segment page. (sloppy)
 	      if (window.location.href.indexOf('segments') + 1) {
+	        this.fixTables();
 	        self.logo(document.querySelector('.ldrboard .filters'));
 	        effort.get(); return;
 	      }
