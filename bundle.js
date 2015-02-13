@@ -104,11 +104,11 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  wundergroundKey: localStorage.getItem('strava-weather-wunderground-key') || null,
-	  stravaKey: localStorage.getItem('strava-weather-strava-key') || null,
-	  effortNum: 3,
-	  apiUrl: '//api.wunderground.com/api/',
-	  apiref: '29a88f63f2af2eab'
+	  wundergroundKey: localStorage.getItem('strava-weather-wunderground-key') || null, // set by user
+	  stravaKey: localStorage.getItem('strava-weather-strava-key') || null, // set by user
+	  effortNum: 3, // number of efforts to get data for per leaderobard
+	  apiUrl: '//api.wunderground.com/api/', // api url
+	  apiref: '29a88f63f2af2eab' // ref code for raindrops
 	}
 
 /***/ },
@@ -120,18 +120,20 @@
 	    weather = __webpack_require__(6);
 
 	module.exports = {
+	  /* get weather data for an activity */
 	  getWeather: function(data, id) {
 	    var self = this;
 	    var date = data.start_date_local_raw || data.start_date_local,
+	        day = date.split('T')[0];
 	        coords = data.start_latlng,
-	        localWeather = localStorage['weatherdata-' + id] || null;
+	        localWeather = localStorage['weatherdata-' + day] || null;
 
 	    if (localWeather) {
 	      self.render(JSON.parse(localWeather), date, coords);
 	    } else {
 
 	      $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
-	        localStorage.setItem('weatherdata-' + id, JSON.stringify(weatherData));
+	        localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
 	        self.render(weatherData, date, coords);
 	      });
 	    }
@@ -153,6 +155,7 @@
 	    }
 	  },
 
+	  /* return the html payload for the activity page */
 	  render: function(weatherData, date, coords) {
 	    var wind = weather.windAvg(weatherData, date);
 	    var date = weather.date(date);
@@ -180,12 +183,14 @@
 	        weather = __webpack_require__(6);
 
 	module.exports = {
+	  /* get weather data for a particular effort */
 	  getWeather: function(data, coords) {
 	    var self = this;
 	    $.each(data, function(i, athleteInfo){
 	      var date = athleteInfo.start_date_local_raw || athleteInfo.start_date_local;
+	      var day = date.split('T')[0];
 	      var id = athleteInfo.effort_id;
-	      var localWeather = localStorage['weatherdata-' + id] || null;
+	      var localWeather = localStorage['weatherdata-' + day] || null;
 	      // if local storage weather is already set
 
 	      if (i < constant.effortNum) {
@@ -193,22 +198,20 @@
 	          self.render(JSON.parse(localWeather), id, date, coords);
 	        } else { // if its not set, call wunderground api
 	          $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
-	            localStorage.setItem('weatherdata-' + id, JSON.stringify(weatherData));
+	            localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
 	            self.render(weatherData, id, date, coords);
 	          });
 	        }
 	      }
 	    });
-
 	  },
 
+	  /* get data from an individual effort */
 	  get: function() {
 	    var self = this;
 	    var segmentId = window.location.href.match(/\d+/g)[0];
 
-	    // if no segment data exists in localStorage
 	    if (!localStorage['effortdata-'+segmentId]) {
-	      // get segment data via API
 	      $.getJSON('/api/v3/segments/' + segmentId + '/leaderboard?access_token=' + constant.stravaKey, function(data){
 	        localStorage.setItem('effortdata-' + segmentId, JSON.stringify(data.entries));
 	        $.getJSON('/stream/segments/' + segmentId, function(coords){
@@ -219,13 +222,12 @@
 	      });
 
 	    } else {
-	      // fire looping logic based on localStorage
 	      self.getWeather(JSON.parse(localStorage['effortdata-' + segmentId]), JSON.parse(localStorage['coords-' + segmentId]));
 	    }
 	  },
 
+	  /* return the payload for an effort */
 	  render: function(weatherData, id, date, coords) {
-
 	    var wind = weather.windAvg(weatherData, date);
 	    var date = weather.date(date);
 	    var markup = [' - <a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', constant.apiref, '" target="_blank">',
@@ -253,11 +255,13 @@
 	var constant = __webpack_require__(2);
 
 	module.exports = {
+	  /* return the markup for the wind arrow */
 	  renderArrow: function(dir) {
 	    dir = dir - 180; // flip arrow around direction the wind is blowing, not coming from
 	    return '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAVCAMAAAB8FU7dAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyhpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NTc3MiwgMjAxNC8wMS8xMy0xOTo0NDowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OTlGOUZBNjVBQTVCMTFFNDkzQkM4RkEzNzYwQTJCMDMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OTlGOUZBNjZBQTVCMTFFNDkzQkM4RkEzNzYwQTJCMDMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5OUY5RkE2M0FBNUIxMUU0OTNCQzhGQTM3NjBBMkIwMyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5OUY5RkE2NEFBNUIxMUU0OTNCQzhGQTM3NjBBMkIwMyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PtjKhBAAAAB7UExURQOWx////+b1+hygzPn9/gmYyMjo81+824283KTZ6+Hq84HL42aq0lel0Hax1jqt06rL5HjH4bjh73DD30612JrC3/f8/aHY6mOp0rzV6Selz97x+Beey43Q5gWXx4y73P3+/8Xa7IHK42C93ILL46Xa66nK5KPZ6////xgnzSAAAAApdFJOU/////////////////////////////////////////////////////8AUvQghwAAAKtJREFUeNpc0EUShEAQRNEs3N2d0b7/CaeNGCA3NH/1osD0HOd44Xg83XsybNu4pRcQXpNlAqZ1SW9EEfxLSvHJkJ6Tg5gohnNKLjwiD+4/GTYCogDKIVOIhPgS5YAS7CLtyiGSj4jklANSkKmkHNACNemAFvTr2msHpKDuwNfV0gH2QMJ/h3ke+Ec4IG6wVMXG2FZUi7gHvpjy8TjomE/wUbYNO61py58AAwDvFCNPWj/szAAAAABJRU5ErkJggg=="/ style="transform:rotate(' + dir + 'deg)scale(.7);">';
 	  },
 
+	  /* return wind in mph */
 	  wind: function(speed, dir) {
 	    var self = this;
 	    if (speed) {
@@ -271,6 +275,7 @@
 	    }
 	  },
 
+	  /* formula for averaging the wind over a few data points */
 	  windAvg: function(weather, date) {
 	    var observations = weather.history.observations, i, len;
 
@@ -302,6 +307,7 @@
 	  },
 
 	  /* doesnt really belong here... */
+	  /* given a string format date, return an array with month day and year split up */
 	  date: function(date) {
 	    date = date.split('T')[0].split('-');
 	    month = new Date(Date.parse(date[1] +" 1, 2012")).getMonth()+1;
@@ -313,6 +319,7 @@
 	    };
 	  },
 
+	  /* return weather API url based on lat/lon and time*/
 	  getWeatherAPIUrl: function(coords, date) {
 	    date = date.split('T')[0].split('-').join('');
 	    return [

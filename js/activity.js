@@ -3,18 +3,20 @@ var $ = require('./libs/zepto.js'),
     weather = require('./weather.js');
 
 module.exports = {
+  /* get weather data for an activity */
   getWeather: function(data, id) {
     var self = this;
     var date = data.start_date_local_raw || data.start_date_local,
+        day = date.split('T')[0];
         coords = data.start_latlng,
-        localWeather = localStorage['weatherdata-' + id] || null;
+        localWeather = localStorage['weatherdata-' + day] || null;
 
     if (localWeather) {
       self.render(JSON.parse(localWeather), date, coords);
     } else {
 
       $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
-        localStorage.setItem('weatherdata-' + id, JSON.stringify(weatherData));
+        localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
         self.render(weatherData, date, coords);
       });
     }
@@ -36,6 +38,7 @@ module.exports = {
     }
   },
 
+  /* return the html payload for the activity page */
   render: function(weatherData, date, coords) {
     var wind = weather.windAvg(weatherData, date);
     var date = weather.date(date);
