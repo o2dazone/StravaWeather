@@ -11,6 +11,10 @@
     "128": "icon.png"
   },
 
+  "web_accessible_resources": [
+    "images/*.*"
+  ],
+
   "permissions": [
       "http://api.wunderground.com/*",
       "https://api.wunderground.com/*"
