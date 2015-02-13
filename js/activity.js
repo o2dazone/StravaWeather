@@ -52,7 +52,7 @@ module.exports = {
                   '</li>'
                   ].join('');
 
-    var activityDom = document.querySelector('.inline-stats');
+    var activityDom = document.querySelector('.secondary-stats');
     activityDom.innerHTML += markup
   }
 };

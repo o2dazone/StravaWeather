@@ -17,7 +17,7 @@ module.exports = {
         self.renderArrow(dir),
       ].join('');
     } else {
-      return 'No Data';
+      return 'No Data/Calm';
     }
   },
 
@@ -30,7 +30,7 @@ module.exports = {
 
     for (i = 0, len = observations.length; i < len; i++) {
       var hourWeather = observations[i];
-      if (+hourWeather.date.hour === +hour && hourWeather.wspdi != '-9999') {
+      if ((+hourWeather.date.hour === +hour) && hourWeather.wspdi != '-9999') {
 
         avgSpeed += +hourWeather.wspdi;
         if (+hourWeather.wdird > 179) {
@@ -68,8 +68,9 @@ module.exports = {
   /* return weather API url based on lat/lon and time*/
   getWeatherAPIUrl: function(coords, date) {
     date = date.split('T')[0].split('-').join('');
+
     return [
-      constant.apiUrl, constant.wundergroundKey,
+      constant.apiUrl, constant.wundergroundKey(),
       '/history_',
       date,
       '/q/',

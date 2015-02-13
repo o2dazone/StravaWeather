@@ -65,8 +65,8 @@
 
 	  /* publish help for setting up wunderground API key */
 	  keys: function() {
-	    if (!constant.wundergroundKey) {
-	      console.warn('It looks as though you don\'t have a Wunderground API key set on your browser. Please navigate to http://www.wunderground.com/weather/api/ and register an account. Don\'t worry, it\'s free. Once you\'ve done this, run this command in your browser:');
+	    if (!constant.wundergroundKey()) {
+	      console.warn('It looks as though you don\'t have a Wunderground API key set on your browser. Please navigate to http://www.wunderground.com/weather/api/ and register an account and application. Don\'t worry, it\'s free. Once you\'ve done this, run this command in your browser:');
 	      console.log("localStorage.setItem('strava-weather-wunderground-key','<your wunderground key>');");
 	      console.warn('Once you\'ve done this, refresh the browser.');
 	    }
@@ -78,7 +78,7 @@
 	    }
 
 
-	    return (!constant.wundergroundKey || !constant.stravaKey) ? false : true;
+	    return (!constant.wundergroundKey() || !constant.stravaKey) ? false : true;
 	  },
 
 	  /* start the chrome extension */
@@ -105,9 +105,32 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  wundergroundKey: localStorage.getItem('strava-weather-wunderground-key') || null, // set by user
+	  getWuKeys: function() {
+	    this.keys = localStorage.getItem('strava-weather-wunderground-key').split(',');
+	  },
+
+	  wundergroundKey: function() {
+	    if (!localStorage.getItem('strava-weather-wunderground-key')) return null;
+
+	    if (!this.keys) {
+	      this.getWuKeys();
+	      this.keyItr = 0;
+	    }
+
+	    if (!this.effortNum) {
+	      this.effortNum = this.keys.length;
+	    }
+
+	    if (this.keyItr >= this.keys.length) {
+	      this.keyItr = 0;
+	    }
+
+	    var key = this.keys[this.keyItr];
+	    this.keyItr++;
+	    return key;
+	  },
+
 	  stravaKey: localStorage.getItem('strava-weather-strava-key') || null, // set by user
-	  effortNum: 3, // number of efforts to get data for per leaderobard
 	  apiUrl: '//api.wunderground.com/api/', // api url
 	  apiref: '29a88f63f2af2eab' // ref code for raindrops
 	}
@@ -170,7 +193,7 @@
 	                  '</li>'
 	                  ].join('');
 
-	    var activityDom = document.querySelector('.inline-stats');
+	    var activityDom = document.querySelector('.secondary-stats');
 	    activityDom.innerHTML += markup
 	  }
 	};
@@ -272,7 +295,7 @@
 	        self.renderArrow(dir),
 	      ].join('');
 	    } else {
-	      return 'No Data';
+	      return 'No Data/Calm';
 	    }
 	  },
 
@@ -285,7 +308,7 @@
 
 	    for (i = 0, len = observations.length; i < len; i++) {
 	      var hourWeather = observations[i];
-	      if (+hourWeather.date.hour === +hour && hourWeather.wspdi != '-9999') {
+	      if ((+hourWeather.date.hour === +hour) && hourWeather.wspdi != '-9999') {
 
 	        avgSpeed += +hourWeather.wspdi;
 	        if (+hourWeather.wdird > 179) {
@@ -323,8 +346,9 @@
 	  /* return weather API url based on lat/lon and time*/
 	  getWeatherAPIUrl: function(coords, date) {
 	    date = date.split('T')[0].split('-').join('');
+
 	    return [
-	      constant.apiUrl, constant.wundergroundKey,
+	      constant.apiUrl, constant.wundergroundKey(),
 	      '/history_',
 	      date,
 	      '/q/',

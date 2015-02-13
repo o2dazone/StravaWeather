@@ -12,8 +12,8 @@ module.exports = {
 
   /* publish help for setting up wunderground API key */
   keys: function() {
-    if (!constant.wundergroundKey) {
-      console.warn('It looks as though you don\'t have a Wunderground API key set on your browser. Please navigate to http://www.wunderground.com/weather/api/ and register an account. Don\'t worry, it\'s free. Once you\'ve done this, run this command in your browser:');
+    if (!constant.wundergroundKey()) {
+      console.warn('It looks as though you don\'t have a Wunderground API key set on your browser. Please navigate to http://www.wunderground.com/weather/api/ and register an account and application. Don\'t worry, it\'s free. Once you\'ve done this, run this command in your browser:');
       console.log("localStorage.setItem('strava-weather-wunderground-key','<your wunderground key>');");
       console.warn('Once you\'ve done this, refresh the browser.');
     }
@@ -25,7 +25,7 @@ module.exports = {
     }
 
 
-    return (!constant.wundergroundKey || !constant.stravaKey) ? false : true;
+    return (!constant.wundergroundKey() || !constant.stravaKey) ? false : true;
   },
 
   /* start the chrome extension */
