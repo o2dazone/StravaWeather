@@ -10,14 +10,20 @@ module.exports = {
   /* return wind in mph */
   wind: function(speed, dir) {
     var self = this;
-    if (speed) {
-      return [
+
+    switch (speed) {
+      case 0:
+        return 'Calm';
+        break;
+      case null:
+        return 'No Data';
+        break;
+      default:
+        return [
         Math.round(speed),
         'mph',
         self.renderArrow(dir),
       ].join('');
-    } else {
-      return 'No Data/Calm';
     }
   },
 
@@ -26,13 +32,13 @@ module.exports = {
     var observations = weather.history.observations, i, len;
 
     var hour = date.split('T')[1].split(':')[0];
-    var avgSpeed = 0, avgDir = 0, match = 0;
+    var avgSpeed = null, avgDir = 0, match = 0;
 
     for (i = 0, len = observations.length; i < len; i++) {
       var hourWeather = observations[i];
       if ((+hourWeather.date.hour === +hour) && hourWeather.wspdi != '-9999') {
-
         avgSpeed += +hourWeather.wspdi;
+
         if (+hourWeather.wdird > 179) {
           hourWeather.wdird = +hourWeather.wdird - 360;
         }
@@ -41,7 +47,7 @@ module.exports = {
       }
     }
 
-    if (match) {
+    if (avgSpeed) {
       avgSpeed = (avgSpeed/match);
       avgDir = (avgDir/match);
     }
