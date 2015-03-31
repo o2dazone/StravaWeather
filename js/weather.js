@@ -21,6 +21,7 @@ module.exports = {
       default:
         return [
         Math.round(speed),
+        'mph',
         self.renderArrow(dir),
       ].join('');
     }
