@@ -2,6 +2,18 @@ var constant = require('./constants.js'),
     activity = require('./activity.js'),
     effort = require('./effort.js');
 
+var target, func;
+function bindEvents() {
+  document.body.addEventListener('click', function(e){
+    target = e.target;
+
+    if ((func = target.getAttribute('sw'))) {
+      e.preventDefault();
+      eval(func)();
+    }
+  });
+}
+
 module.exports = {
   /* render the logo for Wunderground */
   logo: function(selector) {
@@ -39,10 +51,14 @@ module.exports = {
     var self = this;
 
     if (self.keys()) {
+      bindEvents();
+
+
+
       // you're on an activities page (sloppy)
       if (window.location.href.indexOf('activities') + 1) {
         self.logo(document.querySelector('.activity-stats .inset'));
-        activity.get(); return;
+        activity.init(); return;
       }
 
       // you're on a segment page. (sloppy)

@@ -55,6 +55,18 @@
 	    activity = __webpack_require__(3),
 	    effort = __webpack_require__(4);
 
+	var target, func;
+	function bindEvents() {
+	  document.body.addEventListener('click', function(e){
+	    target = e.target;
+
+	    if ((func = target.getAttribute('sw'))) {
+	      e.preventDefault();
+	      eval(func)();
+	    }
+	  });
+	}
+
 	module.exports = {
 	  /* render the logo for Wunderground */
 	  logo: function(selector) {
@@ -92,10 +104,14 @@
 	    var self = this;
 
 	    if (self.keys()) {
+	      bindEvents();
+
+
+
 	      // you're on an activities page (sloppy)
 	      if (window.location.href.indexOf('activities') + 1) {
 	        self.logo(document.querySelector('.activity-stats .inset'));
-	        activity.get(); return;
+	        activity.init(); return;
 	      }
 
 	      // you're on a segment page. (sloppy)
@@ -151,59 +167,68 @@
 	    constant = __webpack_require__(2),
 	    weather = __webpack_require__(6);
 
-	module.exports = {
-	  /* get weather data for an activity */
-	  getWeather: function(data, id) {
-	    var self = this;
-	    var date = data.start_date_local_raw || data.start_date_local,
-	        day = date.split('T')[0];
-	        coords = data.start_latlng,
-	        localWeather = localStorage['weatherdata-' + day] || null;
+	function init() {
+	  get();
+	}
 
-	    if (localWeather) {
-	      self.render(JSON.parse(localWeather), date, coords);
-	    } else {
+	function reload() {
+	  $('#sw-activity').remove();
+	  get(1);
+	}
 
-	      $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
-	        localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
-	        self.render(weatherData, date, coords);
-	      });
-	    }
-	  },
+	/* gets activity data */
+	function get(fetchNewData) {
+	  var activityId = window.location.href.match(/\d+/g)[0];
+	  var weatherData = (!fetchNewData) ? localStorage['activitydata-' + activityId] : null;
 
-	  /* gets activity data */
-	  get: function() {
-	    var self = this;
-	    var activityId = window.location.href.match(/\d+/g)[0];
-	    var weatherData = localStorage['activitydata-' + activityId] || null;
-
-	    if (!weatherData) {
-	      $.getJSON('/api/v3/activities/' + activityId + '?access_token=' + constant.stravaKey, function(data){
-	        localStorage.setItem('activitydata-' + activityId, JSON.stringify(data));
-	        self.getWeather(data, activityId);
-	      });
-	    } else {
-	      self.getWeather(JSON.parse(weatherData), activityId);
-	    }
-	  },
-
-	  /* return the html payload for the activity page */
-	  render: function(weatherData, date, coords) {
-	    var wind = weather.windAvg(weatherData, date);
-	    var date = weather.date(date);
-	    var markup = ['<li>',
-	                    '<strong>',
-	                      '<a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', constant.apiref, '" target="_blank">',
-	                        weather.wind(wind.speed, wind.direction),
-	                      '</a>',
-	                    '</strong>',
-	                    '<div class="label">Wind Speed</div>',
-	                  '</li>'
-	                  ].join('');
-
-	    var activityDom = document.querySelector('.secondary-stats');
-	    activityDom.innerHTML += markup
+	  if (!weatherData) {
+	    $.getJSON('/api/v3/activities/' + activityId + '?access_token=' + constant.stravaKey, function(data){
+	      localStorage.setItem('activitydata-' + activityId, JSON.stringify(data));
+	      getWeather(data, activityId, fetchNewData);
+	    });
+	  } else {
+	    getWeather(JSON.parse(weatherData), activityId);
 	  }
+	}
+
+	/* get weather data for an activity */
+	function getWeather(data, id, fetchNewData) {
+	  var date = data.start_date_local_raw || data.start_date_local,
+	      day = date.split('T')[0];
+	      coords = data.start_latlng,
+	      localWeather = localStorage['weatherdata-' + day] || null;
+
+	  if (localWeather && !fetchNewData) {
+	    render(JSON.parse(localWeather), date, coords);
+	  } else {
+	    $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
+	      localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
+	      render(weatherData, date, coords);
+	    });
+	  }
+	}
+
+	/* return the html payload for the activity page */
+	function render(weatherData, date, coords) {
+	  var wind = weather.windAvg(weatherData, date);
+	  var date = weather.date(date);
+	  var markup = ['<li id="sw-activity">',
+	                  '<strong>',
+	                    '<a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', constant.apiref, '" target="_blank">',
+	                      weather.wind(wind.speed, wind.direction),
+	                    '</a>',
+	                  '</strong>',
+	                  '<div class="label">Wind Speed <a href="#" sw="activity.reload">Reload Weather</a></div>',
+	                '</li>'
+	                ].join('');
+
+	  var activityDom = document.querySelector('.secondary-stats');
+	  activityDom.innerHTML += markup
+	}
+
+	module.exports = {
+	  init: init,
+	  reload: reload
 	};
 
 /***/ },
@@ -214,62 +239,68 @@
 	        constant = __webpack_require__(2),
 	        weather = __webpack_require__(6);
 
-	module.exports = {
-	  /* get weather data for a particular effort */
-	  getWeather: function(data, coords) {
-	    var self = this;
-	    $.each(data, function(i, athleteInfo){
-	      var date = athleteInfo.start_date_local_raw || athleteInfo.start_date_local;
-	      var day = date.split('T')[0];
-	      var id = athleteInfo.effort_id;
-	      var localWeather = localStorage['weatherdata-' + day] || null;
-	      // if local storage weather is already set
+	function reload() {
+	  $('.sw-segment-weather').remove();
+	  get(1);
+	}
 
-	      if (i < constant.effortNum) {
-	        if (localWeather) {
-	          self.render(JSON.parse(localWeather), id, date, coords);
-	        } else { // if its not set, call wunderground api
-	          $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
-	            localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
-	            self.render(weatherData, id, date, coords);
-	          });
-	        }
-	      }
-	    });
-	  },
+	/* return the payload for an effort */
+	function render(weatherData, id, date, coords) {
+	  var wind = weather.windAvg(weatherData, date);
+	  var date = weather.date(date);
+	  var markup = ['<div style="display:inline;" class="sw-segment-weather"> - <a title="wind in MPH" href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', constant.apiref, '" target="_blank">',
+	                    weather.wind(wind.speed, wind.direction),
+	                  '</a> <a href="#" sw="effort.reload">&#8635;</div>',
+	                ].join('');
 
-	  /* get data from an individual effort */
-	  get: function() {
-	    var self = this;
-	    var segmentId = window.location.href.match(/\d+/g)[0];
+	  var effortDom = document.querySelector('#results a[href="/segment_efforts/' + id + '"');
+	  effortDom.parentNode.innerHTML += markup;
+	}
 
-	    if (!localStorage['effortdata-'+segmentId]) {
-	      $.getJSON('/api/v3/segments/' + segmentId + '/leaderboard?access_token=' + constant.stravaKey, function(data){
-	        localStorage.setItem('effortdata-' + segmentId, JSON.stringify(data.entries));
-	        $.getJSON('/stream/segments/' + segmentId, function(coords){
-	          localStorage.setItem('coords-' + segmentId, JSON.stringify(coords.latlng[0]));
-	          self.getWeather(data.entries,coords.latlng[0]);
-	        });
+	/* get data from an individual effort */
+	function get(fetchNewData) {
+	  var segmentId = window.location.href.match(/\d+/g)[0];
 
+	  if (fetchNewData || !localStorage['effortdata-'+segmentId]) {
+	    $.getJSON('/api/v3/segments/' + segmentId + '/leaderboard?access_token=' + constant.stravaKey, function(data){
+	      localStorage.setItem('effortdata-' + segmentId, JSON.stringify(data.entries));
+	      $.getJSON('/stream/segments/' + segmentId, function(coords){
+	        localStorage.setItem('coords-' + segmentId, JSON.stringify(coords.latlng[0]));
+	        getWeather(data.entries, coords.latlng[0], fetchNewData);
 	      });
 
-	    } else {
-	      self.getWeather(JSON.parse(localStorage['effortdata-' + segmentId]), JSON.parse(localStorage['coords-' + segmentId]));
-	    }
-	  },
+	    });
 
-	  /* return the payload for an effort */
-	  render: function(weatherData, id, date, coords) {
-	    var wind = weather.windAvg(weatherData, date);
-	    var date = weather.date(date);
-	    var markup = [' - <a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', constant.apiref, '" target="_blank">',
-	                      weather.wind(wind.speed, wind.direction),
-	                    '</a>',
-	                  ].join('');
-
-	    var effortDom = document.querySelector('#results a[href="/segment_efforts/' + id + '"');
-	    effortDom.parentNode.innerHTML += markup;
+	  } else {
+	    getWeather(JSON.parse(localStorage['effortdata-' + segmentId]), JSON.parse(localStorage['coords-' + segmentId]));
 	  }
+	}
+
+	/* get weather data for a particular effort */
+	function getWeather(data, coords, fetchNewData) {
+	  $.each(data, function(i, athleteInfo){
+	    var date = athleteInfo.start_date_local_raw || athleteInfo.start_date_local;
+	    var day = date.split('T')[0];
+	    var id = athleteInfo.effort_id;
+	    var localWeather = localStorage['weatherdata-' + day] || null;
+	    // if local storage weather is already set
+
+	    if (i < constant.effortNum) {
+	      if (!fetchNewData && localWeather) {
+	        render(JSON.parse(localWeather), id, date, coords);
+	      } else { // if its not set, call wunderground api
+	        $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
+	          localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
+	          render(weatherData, id, date, coords);
+	        });
+	      }
+	    }
+	  });
+	}
+
+	module.exports = {
+	  get: get,
+	  reload: reload
 	};
 
 /***/ },
@@ -307,7 +338,6 @@
 	      default:
 	        return [
 	        Math.round(speed),
-	        'mph',
 	        self.renderArrow(dir),
 	      ].join('');
 	    }
