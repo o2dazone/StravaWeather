@@ -26,10 +26,17 @@ function get(fetchNewData) {
 
   if (fetchNewData || !localStorage['effortdata-'+segmentId]) {
     $.getJSON('/api/v3/segments/' + segmentId + '/leaderboard?access_token=' + constant.stravaKey, function(data){
-      localStorage.setItem('effortdata-' + segmentId, JSON.stringify(data.entries));
+
+      var newData = [], entry;
+      for (var i = 0; i < constant.effortNum; i++) {
+        entry = data.entries[i];
+        newData.push(weather.filter(entry, ['effort_id', 'start_date_local', 'start_date_local_raw']));
+      }
+
+      localStorage.setItem('effortdata-' + segmentId, JSON.stringify(newData));
       $.getJSON('/stream/segments/' + segmentId, function(coords){
         localStorage.setItem('coords-' + segmentId, JSON.stringify(coords.latlng[0]));
-        getWeather(data.entries, coords.latlng[0], fetchNewData);
+        getWeather(newData, coords.latlng[0], fetchNewData);
       });
 
     });
@@ -48,13 +55,20 @@ function getWeather(data, coords, fetchNewData) {
     var localWeather = localStorage['weatherdata-' + day] || null;
     // if local storage weather is already set
 
+
     if (i < constant.effortNum) {
       if (!fetchNewData && localWeather) {
         render(JSON.parse(localWeather), id, date, coords);
       } else { // if its not set, call wunderground api
         $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
-          localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
-          render(weatherData, id, date, coords);
+
+          var newData = [];
+          for (var i = 0; i < weatherData.history.observations.length; i++) {
+            newData.push(weather.filter(weatherData.history.observations[i], ['date','wdird','wspdi'] ))
+          }
+
+          localStorage.setItem('weatherdata-' + day, JSON.stringify(newData));
+          render(newData, id, date, coords);
         });
       }
     }

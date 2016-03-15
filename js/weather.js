@@ -29,7 +29,7 @@ module.exports = {
 
   /* formula for averaging the wind over a few data points */
   windAvg: function(weather, date) {
-    var observations = weather.history.observations, i, len;
+    var observations = weather, i, len;
 
     var hour = date.split('T')[1].split(':')[0];
     var avgSpeed = null, avgDir = 0, match = 0;
@@ -56,6 +56,19 @@ module.exports = {
       speed: avgSpeed,
       direction: avgDir
     };
+  },
+
+  filter: function(data, filters) {
+    var newData = {},
+        filter;
+
+    for (var i = 0; i < filters.length; i++) {
+      filter = filters[i];
+      if (data[filter])
+        newData[filter] = data[filter];
+    }
+
+    return newData;
   },
 
   /* doesnt really belong here... */

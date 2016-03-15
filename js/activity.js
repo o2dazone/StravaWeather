@@ -37,8 +37,14 @@ function getWeather(data, id, fetchNewData) {
     render(JSON.parse(localWeather), date, coords);
   } else {
     $.getJSON(weather.getWeatherAPIUrl(coords, date), function(weatherData) {
-      localStorage.setItem('weatherdata-' + day, JSON.stringify(weatherData));
-      render(weatherData, date, coords);
+
+      var newData = [];
+      for (var i = 0; i < weatherData.history.observations.length; i++) {
+        newData.push(weather.filter(weatherData.history.observations[i], ['date','wdird','wspdi'] ))
+      }
+
+      localStorage.setItem('weatherdata-' + day, JSON.stringify(newData));
+      render(newData, date, coords);
     });
   }
 }
