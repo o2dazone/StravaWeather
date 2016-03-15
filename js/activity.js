@@ -14,11 +14,11 @@ function reload() {
 /* gets activity data */
 function get(fetchNewData) {
   var activityId = window.location.href.match(/\d+/g)[0];
-  var weatherData = (!fetchNewData) ? localStorage['activitydata-' + activityId] : null;
+  var weatherData = (!fetchNewData) ? localStorage['a-' + activityId] : null;
 
   if (!weatherData) {
     $.getJSON('/api/v3/activities/' + activityId + '?access_token=' + constant.stravaKey, function(data){
-      localStorage.setItem('activitydata-' + activityId, JSON.stringify(data));
+      localStorage.setItem('a-' + activityId, '');
       getWeather(data, activityId, fetchNewData);
     });
   } else {
@@ -31,7 +31,7 @@ function getWeather(data, id, fetchNewData) {
   var date = data.start_date_local_raw || data.start_date_local,
       day = date.split('T')[0];
       coords = data.start_latlng,
-      localWeather = localStorage['weatherdata-' + day] || null;
+      localWeather = localStorage['w-' + day] || null;
 
   if (localWeather && !fetchNewData) {
     render(JSON.parse(localWeather), date, coords);
@@ -40,10 +40,10 @@ function getWeather(data, id, fetchNewData) {
 
       var newData = [];
       for (var i = 0; i < weatherData.history.observations.length; i++) {
-        newData.push(weather.filter(weatherData.history.observations[i], ['date','wdird','wspdi'] ))
+        newData.push(weather.filter(weatherData.history.observations[i], ['date.hour','wdird','wspdi'] ))
       }
 
-      localStorage.setItem('weatherdata-' + day, JSON.stringify(newData));
+      localStorage.setItem('w-' + day, JSON.stringify(newData));
       render(newData, date, coords);
     });
   }

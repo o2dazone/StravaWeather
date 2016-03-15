@@ -50,10 +50,17 @@ module.exports = {
   start: function () {
     var self = this;
 
+    // wipe localStorage if it gets too big
+    if (JSON.stringify(localStorage).length > 4000000) {
+      var wund = localStorage.getItem('strava-weather-wunderground-key');
+      var strv = localStorage.getItem('strava-weather-strava-key');
+      localStorage.clear();
+      localStorage.setItem('strava-weather-wunderground-key', wund);
+      localStorage.setItem('strava-weather-strava-key', strv);
+    }
+
     if (self.keys()) {
       bindEvents();
-
-
 
       // you're on an activities page (sloppy)
       if (window.location.href.indexOf('activities') + 1) {

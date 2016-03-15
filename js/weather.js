@@ -29,14 +29,14 @@ module.exports = {
 
   /* formula for averaging the wind over a few data points */
   windAvg: function(weather, date) {
-    var observations = weather, i, len;
+    var observations = weather;
 
     var hour = date.split('T')[1].split(':')[0];
     var avgSpeed = null, avgDir = 0, match = 0;
 
-    for (i = 0, len = observations.length; i < len; i++) {
+    for (var i = 0; i < observations.length; i++) {
       var hourWeather = observations[i];
-      if ((+hourWeather.date.hour === +hour) && hourWeather.wspdi != '-9999') {
+      if ((+hourWeather.hour === +hour) && hourWeather.wspdi != '-9999') {
         avgSpeed += +hourWeather.wspdi;
 
         if (+hourWeather.wdird > 179) {
@@ -59,13 +59,23 @@ module.exports = {
   },
 
   filter: function(data, filters) {
-    var newData = {},
-        filter;
+    var filter,
+        deepFilter,
+        newData = {};
 
-    for (var i = 0; i < filters.length; i++) {
-      filter = filters[i];
-      if (data[filter])
+    for (var i = 0; i < filters.length; i++ ) {
+      filter = filters[i].split('.');
+      if (filter.length > 1) {
+        // do multi deep thing
+        deepFilter = data;
+        for (var j = 0; j < filter.length; j++) {
+          deepFilter = deepFilter[filter[j]];
+        }
+        newData[filter[j-1]] = deepFilter;
+      } else {
+        filter = filter[0];
         newData[filter] = data[filter];
+      }
     }
 
     return newData;

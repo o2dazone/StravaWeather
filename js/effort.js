@@ -24,7 +24,7 @@ function render(weatherData, id, date, coords) {
 function get(fetchNewData) {
   var segmentId = window.location.href.match(/\d+/g)[0];
 
-  if (fetchNewData || !localStorage['effortdata-'+segmentId]) {
+  if (fetchNewData || !localStorage['e-'+segmentId]) {
     $.getJSON('/api/v3/segments/' + segmentId + '/leaderboard?access_token=' + constant.stravaKey, function(data){
 
       var newData = [], entry;
@@ -33,16 +33,16 @@ function get(fetchNewData) {
         newData.push(weather.filter(entry, ['effort_id', 'start_date_local', 'start_date_local_raw']));
       }
 
-      localStorage.setItem('effortdata-' + segmentId, JSON.stringify(newData));
+      localStorage.setItem('e-' + segmentId, JSON.stringify(newData));
       $.getJSON('/stream/segments/' + segmentId, function(coords){
-        localStorage.setItem('coords-' + segmentId, JSON.stringify(coords.latlng[0]));
+        localStorage.setItem('c-' + segmentId, JSON.stringify(coords.latlng[0]));
         getWeather(newData, coords.latlng[0], fetchNewData);
       });
 
     });
 
   } else {
-    getWeather(JSON.parse(localStorage['effortdata-' + segmentId]), JSON.parse(localStorage['coords-' + segmentId]));
+    getWeather(JSON.parse(localStorage['e-' + segmentId]), JSON.parse(localStorage['c-' + segmentId]));
   }
 }
 
@@ -52,7 +52,7 @@ function getWeather(data, coords, fetchNewData) {
     var date = athleteInfo.start_date_local_raw || athleteInfo.start_date_local;
     var day = date.split('T')[0];
     var id = athleteInfo.effort_id;
-    var localWeather = localStorage['weatherdata-' + day] || null;
+    var localWeather = localStorage['w-' + day] || null;
     // if local storage weather is already set
 
 
@@ -64,10 +64,10 @@ function getWeather(data, coords, fetchNewData) {
 
           var newData = [];
           for (var i = 0; i < weatherData.history.observations.length; i++) {
-            newData.push(weather.filter(weatherData.history.observations[i], ['date','wdird','wspdi'] ))
+            newData.push(weather.filter(weatherData.history.observations[i], ['date.hour','wdird','wspdi'] ))
           }
 
-          localStorage.setItem('weatherdata-' + day, JSON.stringify(newData));
+          localStorage.setItem('w-' + day, JSON.stringify(newData));
           render(newData, id, date, coords);
         });
       }

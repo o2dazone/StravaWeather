@@ -103,10 +103,17 @@
 	  start: function () {
 	    var self = this;
 
+	    // wipe localStorage if it gets too big
+	    if (JSON.stringify(localStorage).length > 4000000) {
+	      var wund = localStorage.getItem('strava-weather-wunderground-key');
+	      var strv = localStorage.getItem('strava-weather-strava-key');
+	      localStorage.clear();
+	      localStorage.setItem('strava-weather-wunderground-key', wund);
+	      localStorage.setItem('strava-weather-strava-key', strv);
+	    }
+
 	    if (self.keys()) {
 	      bindEvents();
-
-
 
 	      // you're on an activities page (sloppy)
 	      if (window.location.href.indexOf('activities') + 1) {
@@ -179,11 +186,11 @@
 	/* gets activity data */
 	function get(fetchNewData) {
 	  var activityId = window.location.href.match(/\d+/g)[0];
-	  var weatherData = (!fetchNewData) ? localStorage['activitydata-' + activityId] : null;
+	  var weatherData = (!fetchNewData) ? localStorage['a-' + activityId] : null;
 
 	  if (!weatherData) {
 	    $.getJSON('/api/v3/activities/' + activityId + '?access_token=' + constant.stravaKey, function(data){
-	      localStorage.setItem('activitydata-' + activityId, JSON.stringify(data));
+	      localStorage.setItem('a-' + activityId, '');
 	      getWeather(data, activityId, fetchNewData);
 	    });
 	  } else {
@@ -196,7 +203,7 @@
 	  var date = data.start_date_local_raw || data.start_date_local,
 	      day = date.split('T')[0];
 	      coords = data.start_latlng,
-	      localWeather = localStorage['weatherdata-' + day] || null;
+	      localWeather = localStorage['w-' + day] || null;
 
 	  if (localWeather && !fetchNewData) {
 	    render(JSON.parse(localWeather), date, coords);
@@ -205,10 +212,10 @@
 
 	      var newData = [];
 	      for (var i = 0; i < weatherData.history.observations.length; i++) {
-	        newData.push(weather.filter(weatherData.history.observations[i], ['date','wdird','wspdi'] ))
+	        newData.push(weather.filter(weatherData.history.observations[i], ['date.hour','wdird','wspdi'] ))
 	      }
 
-	      localStorage.setItem('weatherdata-' + day, JSON.stringify(newData));
+	      localStorage.setItem('w-' + day, JSON.stringify(newData));
 	      render(newData, date, coords);
 	    });
 	  }
@@ -267,7 +274,7 @@
 	function get(fetchNewData) {
 	  var segmentId = window.location.href.match(/\d+/g)[0];
 
-	  if (fetchNewData || !localStorage['effortdata-'+segmentId]) {
+	  if (fetchNewData || !localStorage['e-'+segmentId]) {
 	    $.getJSON('/api/v3/segments/' + segmentId + '/leaderboard?access_token=' + constant.stravaKey, function(data){
 
 	      var newData = [], entry;
@@ -276,16 +283,16 @@
 	        newData.push(weather.filter(entry, ['effort_id', 'start_date_local', 'start_date_local_raw']));
 	      }
 
-	      localStorage.setItem('effortdata-' + segmentId, JSON.stringify(newData));
+	      localStorage.setItem('e-' + segmentId, JSON.stringify(newData));
 	      $.getJSON('/stream/segments/' + segmentId, function(coords){
-	        localStorage.setItem('coords-' + segmentId, JSON.stringify(coords.latlng[0]));
+	        localStorage.setItem('c-' + segmentId, JSON.stringify(coords.latlng[0]));
 	        getWeather(newData, coords.latlng[0], fetchNewData);
 	      });
 
 	    });
 
 	  } else {
-	    getWeather(JSON.parse(localStorage['effortdata-' + segmentId]), JSON.parse(localStorage['coords-' + segmentId]));
+	    getWeather(JSON.parse(localStorage['e-' + segmentId]), JSON.parse(localStorage['c-' + segmentId]));
 	  }
 	}
 
@@ -295,7 +302,7 @@
 	    var date = athleteInfo.start_date_local_raw || athleteInfo.start_date_local;
 	    var day = date.split('T')[0];
 	    var id = athleteInfo.effort_id;
-	    var localWeather = localStorage['weatherdata-' + day] || null;
+	    var localWeather = localStorage['w-' + day] || null;
 	    // if local storage weather is already set
 
 
@@ -307,10 +314,10 @@
 
 	          var newData = [];
 	          for (var i = 0; i < weatherData.history.observations.length; i++) {
-	            newData.push(weather.filter(weatherData.history.observations[i], ['date','wdird','wspdi'] ))
+	            newData.push(weather.filter(weatherData.history.observations[i], ['date.hour','wdird','wspdi'] ))
 	          }
 
-	          localStorage.setItem('weatherdata-' + day, JSON.stringify(newData));
+	          localStorage.setItem('w-' + day, JSON.stringify(newData));
 	          render(newData, id, date, coords);
 	        });
 	      }
@@ -366,14 +373,14 @@
 
 	  /* formula for averaging the wind over a few data points */
 	  windAvg: function(weather, date) {
-	    var observations = weather, i, len;
+	    var observations = weather;
 
 	    var hour = date.split('T')[1].split(':')[0];
 	    var avgSpeed = null, avgDir = 0, match = 0;
 
-	    for (i = 0, len = observations.length; i < len; i++) {
+	    for (var i = 0; i < observations.length; i++) {
 	      var hourWeather = observations[i];
-	      if ((+hourWeather.date.hour === +hour) && hourWeather.wspdi != '-9999') {
+	      if ((+hourWeather.hour === +hour) && hourWeather.wspdi != '-9999') {
 	        avgSpeed += +hourWeather.wspdi;
 
 	        if (+hourWeather.wdird > 179) {
@@ -396,13 +403,23 @@
 	  },
 
 	  filter: function(data, filters) {
-	    var newData = {},
-	        filter;
+	    var filter,
+	        deepFilter,
+	        newData = {};
 
-	    for (var i = 0; i < filters.length; i++) {
-	      filter = filters[i];
-	      if (data[filter])
+	    for (var i = 0; i < filters.length; i++ ) {
+	      filter = filters[i].split('.');
+	      if (filter.length > 1) {
+	        // do multi deep thing
+	        deepFilter = data;
+	        for (var j = 0; j < filter.length; j++) {
+	          deepFilter = deepFilter[filter[j]];
+	        }
+	        newData[filter[j-1]] = deepFilter;
+	      } else {
+	        filter = filter[0];
 	        newData[filter] = data[filter];
+	      }
 	    }
 
 	    return newData;
