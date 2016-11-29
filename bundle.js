@@ -124,7 +124,7 @@
 	      // you're on a segment page. (sloppy)
 	      if (window.location.href.indexOf('segments') + 1) {
 	        this.fixTables();
-	        self.logo(document.querySelector('.ldrboard .filters'));
+	        self.logo(document.querySelector('.leaderboard .filters'));
 	        effort.get(); return;
 	      }
 	    }
