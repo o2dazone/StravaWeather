@@ -2,3 +2,6 @@
 .DS_Store
 TODO
 *.sublime-*
+node_modules
+chrome-extension/bundle.js
+js/libs/*

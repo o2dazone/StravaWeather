@@ -1,0 +1,14 @@
+{
+  "name": "stravaweather",
+  "verson": "0.0.0",
+  "scripts": {
+    "server": "gulp watch"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.7",
+    "gulp-connect": "^2.0.6",
+    "gulp-minify": "^1.0.0",
+    "webpack": "^1.4.13",
+    "webpack-stream": "^4.0.0"
+  }
+}

@@ -19,7 +19,7 @@ module.exports = {
   logo: function(selector) {
     var imgUrl = chrome.extension.getURL("images/wu.svg");
     var logo = '<img src="' + imgUrl + '" style="width:180px"/ >';
-    selector.innerHTML += 'Weather data by <a href="http://www.wunderground.com/?apiref=' + constant.apiref + '" target="_blank">' + logo + '</a>';
+    selector.innerHTML += 'Weather data by <a href="https://www.wunderground.com/?apiref=' + constant.apiref + '" target="_blank">' + logo + '</a>';
   },
 
   /* publish help for setting up wunderground API key */
@@ -64,7 +64,7 @@ module.exports = {
 
       // you're on an activities page (sloppy)
       if (window.location.href.indexOf('activities') + 1) {
-        self.logo(document.querySelector('.activity-stats .inset'));
+        self.logo(document.querySelector('.activity-stats'));
         activity.init(); return;
       }
 

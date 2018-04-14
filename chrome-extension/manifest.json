@@ -16,7 +16,6 @@
   ],
 
   "permissions": [
-      "http://api.wunderground.com/*",
       "https://api.wunderground.com/*"
   ],
 

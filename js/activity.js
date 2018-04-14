@@ -55,7 +55,7 @@ function render(weatherData, date, coords) {
   var date = weather.date(date);
   var markup = ['<li id="sw-activity">',
                   '<strong>',
-                    '<a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', constant.apiref, '" target="_blank">',
+                    '<a href="https://www.wunderground.com/cgi-bin/findweather/getForecast?airportorwmo=query&historytype=DailyHistory&backurl=%2Fhistory%2Findex.html&code=', coords.join(','), '&month=', date.month, '&day=', date.day, '&year=', date.year, '&apiref=', constant.apiref, '" target="_blank">',
                       weather.wind(wind.speed, wind.direction),
                     '</a>',
                   '</strong>',
@@ -63,7 +63,7 @@ function render(weatherData, date, coords) {
                 '</li>'
                 ].join('');
 
-  var activityDom = document.querySelector('.secondary-stats');
+  var activityDom = document.querySelector('.activity-stats');
   activityDom.innerHTML += markup
 }
 

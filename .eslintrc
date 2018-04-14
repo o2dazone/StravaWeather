@@ -1,0 +1,37 @@
+{
+  "env": {
+    "browser": true,
+    "amd": true,
+    "es6": true,
+    "node": true
+  },
+  "rules": {
+    "brace-style": [2, "1tbs"],
+    "camelcase": [2, {"properties": "never"}],
+    "comma-dangle": 2,
+    "curly": 2,
+    "eqeqeq": 2,
+    "keyword-spacing": 2,
+    "quotes": [ 2, "single" ],
+    "quote-props": [2, "consistent"],
+    "no-undef": 2,
+    "global-strict": 0,
+    "indent": [2, 2, { "SwitchCase": 1 }],
+    "jsx-quotes": [2, "prefer-double"],
+    "no-debugger": 2,
+    "no-extra-semi": 2,
+    "no-underscore-dangle": 0,
+    "no-console": 2,
+    "no-duplicate-imports": 2,
+    "no-multi-spaces": 2,
+    "no-unused-vars": [2, {"varsIgnorePattern": "React"}],
+    "no-trailing-spaces": [2, { "skipBlankLines": true }],
+    "no-unreachable": 2,
+    "no-alert": 0,
+    "object-curly-spacing": [2, "always", { "objectsInObjects": true }],
+    "semi": 2,
+    "space-before-blocks": 2,
+    "space-infix-ops": 2,
+    "prefer-const": 2
+  }
+}
